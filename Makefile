@@ -22,20 +22,20 @@ default :
 
 # 镜像文件生成
 
-ipl10.bin : ipl10.nas Makefile
-	$(NASK) ipl10.nas ipl10.bin ipl10.lst
+boot_1.bin : boot_1.nas Makefile
+	$(NASK) boot_1.nas boot_1.bin boot_1.lst
 
-asmhead.bin : asmhead.nas Makefile
-	$(NASK) asmhead.nas asmhead.bin asmhead.lst
+jump_2.bin : jump_2.nas Makefile
+	$(NASK) jump_2.nas jump_2.bin jump_2.lst
 
-bootpack.gas : bootpack.c Makefile
-	$(CC1) -o bootpack.gas bootpack.c
+main_3.gas : main_3.c Makefile
+	$(CC1) -o main_3.gas main_3.c
 
-bootpack.nas : bootpack.gas Makefile
-	$(GAS2NASK) bootpack.gas bootpack.nas
+main_3.nas : main_3.gas Makefile
+	$(GAS2NASK) main_3.gas main_3.nas
 
-bootpack.obj : bootpack.nas Makefile
-	$(NASK) bootpack.nas bootpack.obj bootpack.lst
+main_3.obj : main_3.nas Makefile
+	$(NASK) main_3.nas main_3.obj main_3.lst
 
 naskfunc.obj : naskfunc.nas Makefile
 	$(NASK) naskfunc.nas naskfunc.obj naskfunc.lst
@@ -43,20 +43,20 @@ naskfunc.obj : naskfunc.nas Makefile
 hzk16.obj : hzk16.bin Makefile
 	$(BIN2OBJ) hzk16.bin hzk16.obj _hzk16
 	
-bootpack.bim : bootpack.obj naskfunc.obj hzk16.obj Makefile
-	$(OBJ2BIM) @$(RULEFILE) out:bootpack.bim stack:6136k map:bootpack.map \
-		bootpack.obj naskfunc.obj hzk16.obj
+main_3.bim : main_3.obj naskfunc.obj hzk16.obj Makefile
+	$(OBJ2BIM) @$(RULEFILE) out:main_3.bim stack:6136k map:main_3.map \
+		main_3.obj naskfunc.obj hzk16.obj
 # 3MB+64KB=3136KB
 
-bootpack.hrb : bootpack.bim Makefile
-	$(BIM2HRB) bootpack.bim bootpack.hrb 0
+main_3.hrb : main_3.bim Makefile
+	$(BIM2HRB) main_3.bim main_3.hrb 0
 
-haribote.sys : asmhead.bin bootpack.hrb Makefile
-	copy /B asmhead.bin+bootpack.hrb haribote.sys
+haribote.sys : jump_2.bin main_3.hrb Makefile
+	copy /B jump_2.bin+main_3.hrb haribote.sys
 
-haribote.img : ipl10.bin haribote.sys Makefile
+haribote.img : boot_1.bin haribote.sys Makefile
 	$(EDIMG)   imgin:../z_tools/fdimg0at.tek \
-		wbinimg src:ipl10.bin len:512 from:0 to:0 \
+		wbinimg src:boot_1.bin len:512 from:0 to:0 \
 		copy from:haribote.sys to:@: \
 		imgout:haribote.img
 
@@ -75,14 +75,14 @@ install :
 	$(IMGTOL) w a: haribote.img
 
 clean :
-	-$(DEL) ipl10.bin asmhead.bin
+	-$(DEL) boot_1.bin jump_2.bin
 	-$(DEL) *.lst
 	-$(DEL) *.gas
 	-$(DEL) *.obj
-	-$(DEL) bootpack.nas
-	-$(DEL) bootpack.map
-	-$(DEL) bootpack.bim
-	-$(DEL) bootpack.hrb
+	-$(DEL) main_3.nas
+	-$(DEL) main_3.map
+	-$(DEL) main_3.bim
+	-$(DEL) main_3.hrb
 	-$(DEL) haribote.sys
 #	-$(DEL) haribote.img
 
